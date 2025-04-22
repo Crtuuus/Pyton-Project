@@ -1,0 +1,23 @@
+Obsežen podatkovni nabor, ki zajema večplastno naravo kibernetskih napadov v 225 državah v obdobju 14 mesecev, od oktobra 2022 do decembra 2023. Podatkovni nabor, ki vsebuje 77.623 vrstic in 18 polj, ponuja podrobno kronologijo kibernetskih napadov, razvrščenih v osem ključnih dimenzij. Spodaj so opisi stolpcev:
+
+Dan napada (Datum): Beleži datum posameznega kibernetskega napada. Vseh 77.623 zapisov je veljavnih, kar pomeni, da ni manjkajočih datumov.
+
+Država (Besedilo): Navedba države, kjer se je zgodil kibernetski napad. Vsi zapisi so veljavni in zajemajo 225 držav, kar omogoča globalni vpogled v kibernetske grožnje.
+
+Spam (Decimalno): Beleži odstotek napadov povezanih s spamom za določeno državo na določen dan (odstotek izražen v decimalni vrednosti). Na primer: vrednost 0,01358 pomeni, da je Bangladeš tisti dan utrpel 1,358 % spam napadov. Podatkovni vzorec vsebuje 62.982 veljavnih zapisov, povprečje je 0,006094, standardni odklon pa 0,024337. Vrednosti segajo od 0,000010 do 0,302490. Kvartili: 25 % → 0,000090, 50 % → 0,000590, 75 % → 0,003530.
+
+Ransomware (Decimalno): Beleži odstotek napadov z izsiljevalsko programsko opremo za določeno državo na določen dan. Skupaj 52.144 veljavnih zapisov, povprečje 0,000130, standardni odklon 0,000186, vrednosti od 0,000010 do 0,009180. Kvartili: 25 % → 0,000040, 50 % → 0,000070, 75 % → 0,000140.
+
+Lokalna okužba (Decimalno): Beleži odstotek lokalnih okužb za določeno državo na določen dan. 74.469 zapisov, povprečje 0,013350, standardni odklon 0,008415, vrednosti od 0,000240 do 0,049370. Kvartili: 25 % → 0,007150, 50 % → 0,010790, 75 % → 0,017660.
+
+Exploit (Decimalno): Beleži odstotek napadov, ki izkoriščajo ranljivosti, za določeno državo na določen dan. 64.264 veljavnih zapisov, povprečje 0,000469, standardni odklon 0,000368, vrednosti od 0,000010 do 0,004660. Kvartili: 25 % → 0,000210, 50 % → 0,000390, 75 % → 0,000620.
+
+Zlonamerna pošta (Decimalno): Beleži odstotek napadov preko zlonamerne elektronske pošte za določeno državo na določen dan. 69.184 zapisov, povprečje 0,001292, standardni odklon 0,001606, vrednosti od 0,000010 do 0,043220. Kvartili: 25 % → 0,000300, 50 % → 0,000730, 75 % → 0,001690.
+
+Napad na omrežje (Decimalno): Beleži odstotek omrežnih napadov za določeno državo na določen dan. 71.532 zapisov, povprečje 0,002222, standardni odklon 0,003034, vrednosti od 0,000020 do 0,058260. Kvartili: 25 % → 0,000700, 50 % → 0,001290, 75 % → 0,002350.
+
+Pregled na zahtevo (Decimalno): Beleži odstotek pregledov na zahtevo (preko protivirusnega programa) za določeno državo na določen dan. 74.231 veljavnih zapisov, povprečje 0,009756, standardni odklon 0,006080, vrednosti od 0,000240 do 0,124880. Kvartili: 25 % → 0,005210, 50 % → 0,008140, 75 % → 0,012870.
+
+Spletne grožnje (Decimalno): Beleži odstotek spletnih groženj za določeno državo na določen dan. 73.892 zapisov, povprečje 0,013006, standardni odklon 0,004943, vrednosti od 0,000240 do 0,048630. Kvartili: 25 % → 0,009700, 50 % → 0,012570, 75 % → 0,015973.
+
+11-18. Mesto pogostosti (Besedilo): Ta polja (Mesto Spam, Mesto Ransomware, Mesto Lokalna okužba, Mesto Exploit, Mesto Zlonamerna pošta, Mesto Napad na omrežje, Mesto Pregled na zahtevo, Mesto Spletne grožnje) prikazujejo svetovno uvrstitev posamezne države na področju določene vrste kibernetskih napadov. Uvrstitve segajo od 1 do največ 196, povprečne uvrstitve pa se nekoliko razlikujejo glede na vrsto napada. Standardni odklon pri teh uvrstitvah nakazuje na zmerno razpršenost in odraža različen vpliv kibernetskih groženj po svetu.
