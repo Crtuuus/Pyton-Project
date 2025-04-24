@@ -1,0 +1,18 @@
+
+import pandas as pd
+from collections import Counter
+
+# Preberi CSV
+df = pd.read_csv('cyber_data.csv')
+
+# Preštej pojavitve držav
+stevec_drzav = Counter(df['Country'])
+
+# Pretvori v seznam in uredi po številu pojavitev
+najmanj_pogoste = sorted(stevec_drzav.items(), key=lambda x: x[1])[:10]
+
+# Izpiši
+#print("🔻 10 najmanj pogostih držav:")
+#for drzava, stevilo in najmanj_pogoste:
+#    print(f"{drzava}: {stevilo}")
+print(len(stevec_drzav))

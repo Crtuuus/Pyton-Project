@@ -1,0 +1,129 @@
+# Ustvari prazen set za shranjevanje unikatnih imen držav
+#drzave = set()
+
+# Preberi csv datoteko in zberi imena držav
+#with open('cyber_data.csv', 'r') as file:
+#    next(file)  # preskoči prvo vrstico, če vsebuje glavo
+#    for vrstica in file:
+#        podatki = vrstica.strip().split(',')
+#        drzava = podatki[1]
+#        drzave.add(drzava)
+
+# Zapiši v nov txt file, eno državo na vrstico
+#with open('drzave.txt', 'w') as izhod:
+#    for drzava in drzave:
+#        izhod.write(drzava + '\n')
+
+
+###########
+#import country_converter as coco
+
+# Inicializiraj pretvornik
+#cc = coco.CountryConverter()
+
+# Preberi države iz txt datoteke
+#with open('drzave.txt', 'r', encoding='utf-8') as file:
+#    drzave = [vrstica.strip() for vrstica in file]
+
+# Ustvari slovar: država -> kontinent
+#drzava_kontinent = {}
+#for drzava in drzave:
+#    kontinent = cc.convert(names=drzava, to='continent')
+#    if kontinent == 'not found':
+#        kontinent = 'Neznano'
+#    drzava_kontinent[drzava] = kontinent
+
+# Shrani slovar v .py datoteko kot Python spremenljivko
+#with open('drzave_kontinenti.py', 'w', encoding='utf-8') as out_file:
+#    out_file.write(f"drzava_kontinent = {drzava_kontinent}")
+########
+import csv
+from collections import defaultdict
+import country_converter as coco
+import matplotlib.pyplot as plt
+
+# 1) inicializacija country_converter
+cc = coco.CountryConverter()
+
+# 2) ročni popravki imen držav, ki jih converter ne prepozna
+posebni_primeri = {
+    'Virgin Islands': 'North America',
+    'Congo (Democratic Republic of the)': 'Africa',
+    'Réunion Island': 'Africa',
+    'Guadeloupe': 'North America',
+    'Martinique': 'North America',
+    'French Polynesia': 'Oceania',
+    'Åland Islands': 'Europe',
+    'Palestine': 'Asia',
+    'Vatican City State': 'Europe',
+    # po potrebi dopiši še kakšne
+}
+
+def drzava_v_kontinent(drzava):
+    if drzava in posebni_primeri:
+        return posebni_primeri[drzava]
+    k = cc.convert(names=drzava, to='continent')
+    return k if k != 'not found' else 'Neznano'
+
+# 3) imena analiziranih stolpcev (split[2]..split[8])
+stolpci = [
+    'Spam', 'Ransomware', 'Local Infection', 
+    'Exploit', 'Malicious Mail', 'Network Attack', 'On Demand Scan'
+]
+
+# 4) dva slovarja: za vsoto vrednosti in za štetje vrstic na kontinent
+vsote = defaultdict(lambda: [0.0]*len(stolpci))
+stevci = defaultdict(int)
+
+# 5) preberi vrstico po vrstico
+with open('cyber_data.csv', 'r', encoding='utf-8') as f:
+    reader = csv.reader(f)
+    next(reader)  # preskoči glavo
+    for row in reader:
+        # preveri minimalno dolžino
+        if len(row) < 9:
+            continue
+        drzava = row[1]
+        kontinent = drzava_v_kontinent(drzava)
+        stevci[kontinent] += 1
+
+        # vsota za vsako kategorijo
+        for i in range(len(stolpci)):
+            try:
+                vsote[kontinent][i] += float(row[2 + i])
+            except ValueError:
+                pass  # če ni število, preskoči
+
+# 6) izračunaj povprečje za vsak kontinent in zgradi slovar avg_values
+avg_values = {}
+for k, s in vsote.items():
+    n = stevci[k]
+    if n > 0:
+        avg_values[k] = [v / n for v in s]
+    else:
+        avg_values[k] = [0.0]*len(stolpci)
+
+# 7) prikaži, katere kontinente imamo
+print("Razpoložljivi kontinenti:", list(avg_values.keys()))
+
+# 8) izberi kontinent, ki ga želiš vizualizirati
+kontinent = 'Europe'  # npr. 'Asia', 'Africa', 'North America', ...
+
+if kontinent not in avg_values:
+    raise ValueError(f"Kontinent {kontinent} ni v podatkih.")
+
+# 9) izračunaj deleže vseh kategorij znotraj povprečij
+povprecja = avg_values[kontinent]
+total = sum(povprecja)
+if total == 0:
+    raise ValueError(f"Za kontinent {kontinent} ni nobenih podatkov.")
+delezi = [v/total for v in povprecja]
+
+# 10) nariši pie chart
+plt.figure(figsize=(8,8))
+plt.pie(delezi, labels=stolpci, autopct='%1.1f%%', startangle=140)
+plt.title(f"Deleži vrst napadov (povprečje/ dan) za kontinent: {kontinent}")
+plt.axis('equal')
+plt.tight_layout()
+plt.show()
+
