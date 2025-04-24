@@ -1,0 +1,36 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# 1. Naloži podatke
+df = pd.read_csv('cyber_data.csv')
+
+# 2. Kategorije, ki jih analiziramo
+kategorije = [
+    'Spam', 'Ransomware', 'Local Infection',
+    'Exploit', 'Malicious Mail',
+    'Network Attack', 'On Demand Scan', 'Web Threat'
+]
+
+# 3. Povprečna napadenost po državi
+povprecja = df.groupby('Country')[kategorije].mean()
+
+# 4. Izberi kategorijo za prikaz (npr. Spam)
+for kategorija in ('Spam', 'Ransomware', 'Local Infection',
+                   'Exploit', 'Malicious Mail',
+                   'Network Attack', 'On Demand Scan', 'Web Threat'):
+    # 5. Izberi top 10 držav glede na povprečje
+    top10 = povprecja.sort_values(by=kategorija, ascending=False).head(20)
+
+# 5. Izberi top 20 držav glede na povprečje
+    top10 = povprecja.sort_values(by=kategorija, ascending=False).head(20)
+
+# 6. Nariši graf
+    plt.figure(figsize=(10, 6))
+    plt.barh(top10.index[::-1], top10[kategorija][::-1], color='indianred')
+    plt.xlabel('Povprečni delež napadov', fontsize=12)
+    plt.ylabel('Država', fontsize=12)
+    plt.title(f'Top 10 držav po povprečni napadenosti ({kategorija})', fontsize=14)
+    plt.grid(axis='x', linestyle='--', alpha=0.5)
+    plt.tight_layout()
+    plt.show()
+

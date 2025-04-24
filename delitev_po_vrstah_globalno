@@ -1,0 +1,31 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# 1. Naloži podatke
+df = pd.read_csv('cyber_data.csv')
+
+# 2. Stolpci z vrstami napadov (decimalne vrednosti)
+kategorije = [
+    'Spam', 'Ransomware', 'Local Infection',
+    'Exploit', 'Malicious Mail',
+    'Network Attack', 'On Demand Scan', 'Web Threat'
+]
+
+# 3. Izračunaj globalno vsoto po kategorijah
+vsote = df[kategorije].sum(skipna=True)
+
+# 4. Normaliziraj (deleži)
+delezi = vsote / vsote.sum()
+
+# 5. Izpiši kot odstotke
+print("📊 Globalna porazdelitev vrst napadov:")
+for kat, vred in delezi.items():
+    print(f"{kat}: {vred:.2%}")
+
+# 6. Pie chart
+plt.figure(figsize=(8, 8))
+plt.pie(delezi, labels=delezi.index, autopct='%1.1f%%', startangle=140)
+plt.title('Globalna porazdelitev napadov po kategorijah')
+plt.axis('equal')
+plt.tight_layout()
+plt.show()

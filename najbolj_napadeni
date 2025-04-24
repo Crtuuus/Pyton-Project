@@ -1,0 +1,30 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Naloži podatke
+df = pd.read_csv('cyber_data.csv')
+
+# Napadalne kategorije
+kategorije = [
+    'Spam', 'Ransomware', 'Local Infection',
+    'Exploit', 'Malicious Mail',
+    'Network Attack', 'On Demand Scan', 'Web Threat'
+]
+
+# Povprečje napadov po državi in po kategoriji
+povprecja = df.groupby('Country')[kategorije].mean()
+
+# Povprečje čez vse kategorije – globalna napadenost
+globalno_povprecje = povprecja.mean(axis=1)
+
+# Top 10 najbolj napadenih držav
+top10 = globalno_povprecje.sort_values(ascending=False).head(20)
+
+# Vizualizacija
+plt.figure(figsize=(10, 6))
+plt.barh(top10.index[::-1], top10.values[::-1], color='firebrick')
+plt.xlabel('Povprečna napadenost (čez vse kategorije)', fontsize=12)
+plt.title(' Top 10 najbolj napadenih držav (globalno)', fontsize=14)
+plt.grid(axis='x', linestyle='--', alpha=0.5)
+plt.tight_layout()
+plt.show()
