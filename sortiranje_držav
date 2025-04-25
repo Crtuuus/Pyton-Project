@@ -1,0 +1,16 @@
+# 1. Preberi imena držav iz .txt datoteke
+with open('drzave.txt', 'r', encoding='utf-8') as f:
+    drzave = [vrstica.strip() for vrstica in f if vrstica.strip()]
+
+# 2. Uredi po abecedi
+drzave_urejene = sorted(drzave)
+
+# 3. (neobvezno) Izpiši rezultat
+print("📋 Abecedno urejen seznam držav:")
+for d in drzave_urejene:
+    print(d)
+
+# 4. (neobvezno) Shrani v novo datoteko
+with open('drzave_urejene.txt', 'w', encoding='utf-8') as f_out:
+    for d in drzave_urejene:
+        f_out.write(d + '\n')

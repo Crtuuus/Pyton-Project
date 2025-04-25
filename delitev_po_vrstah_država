@@ -1,0 +1,42 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# 1. Naloži podatke
+df = pd.read_csv('cyber_data.csv')
+
+# 2. Stolpci z vrstami napadov
+kategorije = [
+    'Spam', 'Ransomware', 'Local Infection',
+    'Exploit', 'Malicious Mail', 'Network Attack',
+    'On Demand Scan', 'Web Threat'
+]
+
+# 3. Uporabnik vnese državo
+drzava = input("Vnesi ime države (npr. 'Republic of Slovenia'):\n").strip()
+
+# 4. Filtriraj podatke za to državo
+df_drzava = df[df['Country'] == drzava]
+
+# 5. Preveri, če so podatki za državo
+if df_drzava.empty:
+    print(f"Ni podatkov za državo: {drzava}")
+    exit()
+
+# 6. Seštej vse vrednosti po kategorijah
+vsote = df_drzava[kategorije].sum(skipna=True)
+
+# 7. Normaliziraj v deleže
+delezi = vsote / vsote.sum()
+
+# 8. Izpiši kot odstotke v terminal
+print(f"Porazdelitev napadov na državo: {drzava}")
+for kat, delez in delezi.items():
+    print(f"{kat}: {delez:.2%}")
+
+# 9. Pie chart
+plt.figure(figsize=(8, 8))
+plt.pie(delezi, labels=delezi.index, autopct='%1.1f%%', startangle=140)
+plt.title(f'Porazdelitev napadov za državo: {drzava}')
+plt.axis('equal')
+plt.tight_layout()
+plt.show()

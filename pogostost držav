@@ -12,7 +12,7 @@ stevec_drzav = Counter(df['Country'])
 najmanj_pogoste = sorted(stevec_drzav.items(), key=lambda x: x[1])[:10]
 
 # Izpiši
-#print("🔻 10 najmanj pogostih držav:")
+#print("10 najmanj pogostih držav:")
 #for drzava, stevilo in najmanj_pogoste:
 #    print(f"{drzava}: {stevilo}")
 print(len(stevec_drzav))

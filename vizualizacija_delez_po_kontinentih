@@ -20,6 +20,8 @@ posebni_primeri = {
     # po potrebi dopiši še kakšne
 }
 
+kontinenti = {'Africa', 'America', 'Asia', 'Europe', 'Oceania', 'Antarctica'}
+
 def drzava_v_kontinent(drzava):
     if drzava in posebni_primeri:
         return posebni_primeri[drzava]
@@ -65,10 +67,18 @@ for k, s in vsote.items():
         avg_values[k] = [0.0]*len(stolpci)
 
 # 7) prikaži, katere kontinente imamo
-print("Razpoložljivi kontinenti:", list(avg_values.keys()))
-
+prikazi_kontinente = input(f" Kateri kontinent želiš analizirati?\n Možni kontinenti:\n {kontinenti} \n Pusti prazno za vse kontinente. \n")
 # 8) izberi kontinent, ki ga želiš vizualizirati
-for kontinent in ("Europe", "Asia", "America", "Africa", "Oceania", "Antarctica"):
+if prikazi_kontinente.strip() == "":
+    izbrani_kontinenti = kontinenti
+else:
+    if prikazi_kontinente not in kontinenti:
+        print(f"Kontinent '{prikazi_kontinente}' ni veljaven.")
+        exit()
+    izbrani_kontinenti = [prikazi_kontinente]
+
+
+for kontinent in izbrani_kontinenti:
     if kontinent not in avg_values:
         raise ValueError(f"Kontinent {kontinent} ni v podatkih.")
 
