@@ -1,0 +1,27 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import numpy as np
+
+# 1. Naloži podatke
+df = pd.read_csv('cyber_data.csv')
+
+# 2. Kategorije napadov
+kategorije = [
+    'Spam', 'Ransomware', 'Local Infection',
+    'Exploit', 'Malicious Mail',
+    'Network Attack', 'On Demand Scan', 'Web Threat'
+]
+
+# 3. Korelacijska matrika
+corr_matrix = df[kategorije].corr()
+
+# 4. Maska za zgornji trikotnik
+mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
+
+# 5. Nariši heatmap samo spodnjega trikotnika
+plt.figure(figsize=(10, 8))
+sns.heatmap(corr_matrix, mask=mask, annot=True, cmap='coolwarm', fmt=".2f", linewidths=0.5)
+plt.title('Korelacija med vrstami napadov (spodnji trikotnik)')
+plt.tight_layout()
+plt.show()

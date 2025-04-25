@@ -1,0 +1,38 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# 1. Naloži podatke
+df = pd.read_csv('cyber_data.csv')
+df.columns = df.columns.str.strip()
+
+# 2. Pretvori datum (samo prvih 10 znakov), format: DD/MM/YYYY
+df['AttackDate'] = pd.to_datetime(df['AttackDate'].str[:10], dayfirst=True)
+
+# 3. Kategorije napadov
+kategorije = [
+    'Spam', 'Ransomware', 'Local Infection',
+    'Exploit', 'Malicious Mail',
+    'Network Attack', 'On Demand Scan', 'Web Threat'
+]
+
+# 4. Združi po mesecih in SEŠTEJ vse napade
+df_mesecne_vsote = df.groupby(df['AttackDate'].dt.to_period('M'))[kategorije].sum()
+
+# 5. Normaliziraj vsako vrstico tako, da bodo vrednosti deleži (vsota = 1)
+df_mesecni_delezi = df_mesecne_vsote.div(df_mesecne_vsote.sum(axis=1), axis=0)
+
+# 6. Pretvori indeks v timestamp za graf
+df_mesecni_delezi.index = df_mesecni_delezi.index.to_timestamp()
+
+# 7. Izris grafa – stacked area chart
+plt.figure(figsize=(14, 7))
+df_mesecni_delezi.plot.area(figsize=(14, 7), cmap='tab10')
+plt.title('Deleži vrst napadov po mesecih (vsota v mesecu = 100%)')
+plt.xlabel('Mesec')
+plt.ylabel('Delež napadov')
+plt.ylim(0, 1)
+plt.grid(True, linestyle='--', alpha=0.5)
+plt.legend(title='Vrsta napada')
+plt.tight_layout()
+plt.show()
+

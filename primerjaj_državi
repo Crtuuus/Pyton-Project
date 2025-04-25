@@ -1,0 +1,79 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# 1. Naloži podatke
+df = pd.read_csv('cyber_data.csv')
+
+# 2. Stolpci z vrstami napadov
+kategorije = [
+    'Spam', 'Ransomware', 'Local Infection',
+    'Exploit', 'Malicious Mail',
+    'Network Attack', 'On Demand Scan', 'Web Threat'
+]
+
+# 3. Vnos držav
+drzava1 = input("Vnesi ime prve države: ").strip()
+drzava2 = input("Vnesi ime druge države: ").strip()
+
+if drzava1 == drzava2:
+    print("Napaka: Državi morata biti različni.")
+    exit()
+
+# 4. Filtriraj podatke za ti dve državi
+df1 = df[df['Country'] == drzava1]
+df2 = df[df['Country'] == drzava2]
+
+if df1.empty or df2.empty:
+    print("Napaka: Ena ali obe državi nimata podatkov.")
+    exit()
+
+# 5. Seštej vse vrednosti po kategorijah
+vsota1 = df1[kategorije].sum()
+vsota2 = df2[kategorije].sum()
+
+# 6. Pie chart za vsako državo
+for drzava, vsota in zip([drzava1, drzava2], [vsota1, vsota2]):
+    delezi = vsota / vsota.sum()
+    plt.figure(figsize=(7, 7))
+    plt.pie(delezi, labels=delezi.index, autopct='%1.1f%%', startangle=140)
+    plt.title(f"Porazdelitev vrst napadov: {drzava}")
+    plt.axis('equal')
+    plt.tight_layout()
+    plt.show()
+
+# 7. Pripravi skupne vsote
+skupna1 = vsota1.sum()
+skupna2 = vsota2.sum()
+max_skupna = max(skupna1, skupna2)
+
+# 8. Izberi top 5 kategorij glede na skupno vrednost
+top5_kategorije = (vsota1 + vsota2).sort_values(ascending=False).head(5).index.tolist()
+
+# 9. Združi vse kategorije (skupna + top 5)
+vse_kategorije = ['Skupno'] + top5_kategorije
+
+# 10. Pripravi podatke za histogram
+vrednosti1 = [skupna1 / max_skupna * 100]
+vrednosti2 = [skupna2 / max_skupna * 100]
+
+for kat in top5_kategorije:
+    max_v = max(vsota1[kat], vsota2[kat])
+    vrednosti1.append(vsota1[kat] / max_v * 100)
+    vrednosti2.append(vsota2[kat] / max_v * 100)
+
+# 11. Nariši enoten graf z vsemi kategorijami
+plt.figure(figsize=(10, 6))
+x = range(len(vse_kategorije))
+
+bar_width = 0.4
+plt.barh([i + bar_width for i in x], vrednosti1, height=bar_width, label=drzava1, color='steelblue')
+plt.barh(x, vrednosti2, height=bar_width, label=drzava2, color='darkorange')
+
+plt.yticks([i + bar_width / 2 for i in x], vse_kategorije)
+plt.xlabel('Napadi (normalizirano glede na bolj napadeno državo) [%]')
+plt.title(f'Primerjalna analiza napadov: {drzava1} vs {drzava2}')
+plt.legend()
+plt.xlim(0, 110)
+plt.grid(axis='x', linestyle='--', alpha=0.5)
+plt.tight_layout()
+plt.show()

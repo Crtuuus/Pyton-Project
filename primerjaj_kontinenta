@@ -1,0 +1,102 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import country_converter as coco
+
+# Naloži podatke
+df = pd.read_csv('cyber_data.csv')
+
+# Kategorije napadov
+kategorije = [
+    'Spam', 'Ransomware', 'Local Infection',
+    'Exploit', 'Malicious Mail',
+    'Network Attack', 'On Demand Scan', 'Web Threat'
+]
+
+# Pretvori države v kontinente
+cc = coco.CountryConverter()
+posebni_primeri = {
+    'Virgin Islands': 'America',
+    'Congo (Democratic Republic of the)': 'Africa',
+    'Réunion Island': 'Africa',
+    'Guadeloupe': 'America',
+    'Martinique': 'America',
+    'French Polynesia': 'Oceania',
+    'Åland Islands': 'Europe',
+    'Palestine': 'Asia',
+    'Vatican City State': 'Europe',
+}
+
+def drzava_v_kontinent(drzava):
+    if drzava in posebni_primeri:
+        return posebni_primeri[drzava]
+    kontinent = cc.convert(names=drzava, to='continent')
+    return kontinent if kontinent != 'not found' else 'Neznano'
+
+df['Continent'] = df['Country'].apply(drzava_v_kontinent)
+
+# Vnos dveh kontinentov
+kontinent1 = input("Vnesi prvi kontinent: ").strip()
+kontinent2 = input("Vnesi drugi kontinent: ").strip()
+
+if kontinent1 == kontinent2:
+    print("Napaka: Kontinenta morata biti različna.")
+    exit()
+
+df1 = df[df['Continent'] == kontinent1]
+df2 = df[df['Continent'] == kontinent2]
+
+if df1.empty or df2.empty:
+    print("Napaka: Eden ali oba kontinenta nimata podatkov.")
+    exit()
+
+# Seštej po kategorijah
+vsota1 = df1[kategorije].sum()
+vsota2 = df2[kategorije].sum()
+
+# Pie chart za vsak kontinent
+for kontinent, vsota in zip([kontinent1, kontinent2], [vsota1, vsota2]):
+    delezi = vsota / vsota.sum()
+    plt.figure(figsize=(7, 7))
+    plt.pie(delezi, labels=delezi.index, autopct='%1.1f%%', startangle=140)
+    plt.title(f"Porazdelitev vrst napadov: {kontinent}")
+    plt.axis('equal')
+    plt.tight_layout()
+    plt.show()
+
+# Skupna količina napadov
+skupna1 = vsota1.sum()
+skupna2 = vsota2.sum()
+max_skupna = max(skupna1, skupna2)
+
+# Združene kategorije (vključno s skupno vsoto)
+vse_kategorije = ['Skupno'] + kategorije
+
+# Pripravi podatke za graf
+vrednosti1 = [skupna1 / max_skupna * 100]
+vrednosti2 = [skupna2 / max_skupna * 100]
+
+for kat in kategorije:
+    max_v = max(vsota1[kat], vsota2[kat])
+    if max_v == 0:
+        vrednosti1.append(0)
+        vrednosti2.append(0)
+    else:
+        vrednosti1.append(vsota1[kat] / max_v * 100)
+        vrednosti2.append(vsota2[kat] / max_v * 100)
+
+# Nariši skupni horizontalni histogram
+plt.figure(figsize=(10, 7))
+x = range(len(vse_kategorije))
+bar_width = 0.4
+
+plt.barh([i + bar_width for i in x], vrednosti1, height=bar_width, label=kontinent1, color='cornflowerblue')
+plt.barh(x, vrednosti2, height=bar_width, label=kontinent2, color='salmon')
+
+plt.yticks([i + bar_width / 2 for i in x], vse_kategorije)
+plt.xlabel('Napadi (normalizirano glede na bolj napaden kontinent) [%]')
+plt.title(f'Primerjalna analiza napadov: {kontinent1} vs {kontinent2}')
+plt.legend()
+plt.xlim(0, 110)
+plt.grid(axis='x', linestyle='--', alpha=0.5)
+plt.tight_layout()
+plt.show()
