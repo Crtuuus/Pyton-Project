@@ -1,0 +1,54 @@
+import pandas as pd
+import wbgapi as wb
+import seaborn as sns
+import matplotlib.pyplot as plt
+import pycountry
+
+# 1. Naloži podatke o napadih
+df_napadi = pd.read_csv('cyber_data.csv')
+df_napadi.columns = df_napadi.columns.str.strip()
+df_napadi['AttackDate'] = pd.to_datetime(df_napadi['AttackDate'].str[:10], dayfirst=True)
+
+# 2. Izračunaj povprečno napadenost po državi
+kategorije = [
+    'Spam', 'Ransomware', 'Local Infection', 
+    'Exploit', 'Malicious Mail', 
+    'Network Attack', 'On Demand Scan', 'Web Threat'
+]
+povprecja_napadov = df_napadi.groupby('Country')[kategorije].mean()
+
+# 3. Naloži GDP podatke iz World Bank preko wbgapi
+gdp = wb.data.DataFrame('NY.GDP.MKTP.CD', time=2022)
+gdp = gdp.reset_index()
+
+# 4. Pravilno preimenuj stolpce
+gdp = gdp.rename(columns={
+    'economy': 'CountryCode',
+    'NY.GDP.MKTP.CD': 'GDP_2022'
+})
+
+# 5. Funkcija za pridobitev ISO kode države
+def drzava_v_iso(drzava):
+    try:
+        return pycountry.countries.lookup(drzava).alpha_3
+    except:
+        return None
+
+# 6. Dodaj ISO kodo za tvoje države
+povprecja_napadov['CountryCode'] = povprecja_napadov.index.map(drzava_v_iso)
+
+# 7. Združi napade in GDP po ISO kodi
+merged = povprecja_napadov.merge(gdp[['CountryCode', 'GDP_2022']], on='CountryCode', how='left')
+
+# 8. Odstrani vrstice brez podatkov o GDP
+merged = merged.dropna(subset=['GDP_2022'])
+
+# 9. Izračunaj korelacijo vrst napadov z GDP
+korelacija_gdp = merged[kategorije + ['GDP_2022']].corr().loc[kategorije, ['GDP_2022']]
+
+# 10. Nariši heatmap
+plt.figure(figsize=(8, 6))
+sns.heatmap(korelacija_gdp, annot=True, cmap='coolwarm', center=0)
+plt.title('Korelacija vrst napadov z GDP (Bruto domači proizvod države)')
+plt.tight_layout()
+plt.show()

@@ -2,17 +2,19 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import country_converter as coco
 
-# Naloži podatke
+# 1. Naloži podatke
 df = pd.read_csv('cyber_data.csv')
+df.columns = df.columns.str.strip()
+df['AttackDate'] = pd.to_datetime(df['AttackDate'].str[:10], dayfirst=True)
 
-# Kategorije napadov
+# 2. Napadalne kategorije
 kategorije = [
     'Spam', 'Ransomware', 'Local Infection',
     'Exploit', 'Malicious Mail',
     'Network Attack', 'On Demand Scan', 'Web Threat'
 ]
 
-# Pretvori države v kontinente
+# 3. Pripravi pretvorbo države v kontinent
 cc = coco.CountryConverter()
 posebni_primeri = {
     'Virgin Islands': 'America',
@@ -34,7 +36,7 @@ def drzava_v_kontinent(drzava):
 
 df['Continent'] = df['Country'].apply(drzava_v_kontinent)
 
-# Vnos dveh kontinentov
+# 4. Izberi kontinenta
 kontinent1 = input("Vnesi prvi kontinent: ").strip()
 kontinent2 = input("Vnesi drugi kontinent: ").strip()
 
@@ -49,54 +51,38 @@ if df1.empty or df2.empty:
     print("Napaka: Eden ali oba kontinenta nimata podatkov.")
     exit()
 
-# Seštej po kategorijah
+# 5. Seštej napade
 vsota1 = df1[kategorije].sum()
 vsota2 = df2[kategorije].sum()
 
-# Pie chart za vsak kontinent
-for kontinent, vsota in zip([kontinent1, kontinent2], [vsota1, vsota2]):
-    delezi = vsota / vsota.sum()
-    plt.figure(figsize=(7, 7))
-    plt.pie(delezi, labels=delezi.index, autopct='%1.1f%%', startangle=140)
-    plt.title(f"Porazdelitev vrst napadov: {kontinent}")
-    plt.axis('equal')
-    plt.tight_layout()
-    plt.show()
+# 6. Pripravi podatke
+vrednosti = [(vsota1[napad], vsota2[napad]) for napad in kategorije]
 
-# Skupna količina napadov
-skupna1 = vsota1.sum()
-skupna2 = vsota2.sum()
-max_skupna = max(skupna1, skupna2)
+# Dodaj še skupno napadenost
+total1 = vsota1.sum()
+total2 = vsota2.sum()
+vrednosti.append((total1, total2))
 
-# Združene kategorije (vključno s skupno vsoto)
-vse_kategorije = ['Skupno'] + kategorije
+vse_kategorije = kategorije + ['Skupno']
 
-# Pripravi podatke za graf
-vrednosti1 = [skupna1 / max_skupna * 100]
-vrednosti2 = [skupna2 / max_skupna * 100]
+# 7. Nariši piecharte
+fig, axs = plt.subplots(3, 3, figsize=(16, 14))
+axs = axs.flatten()
 
-for kat in kategorije:
-    max_v = max(vsota1[kat], vsota2[kat])
-    if max_v == 0:
-        vrednosti1.append(0)
-        vrednosti2.append(0)
-    else:
-        vrednosti1.append(vsota1[kat] / max_v * 100)
-        vrednosti2.append(vsota2[kat] / max_v * 100)
+for i, (ax, (v1, v2), kategorija) in enumerate(zip(axs, vrednosti, vse_kategorije)):
+    skupno = v1 + v2
+    if skupno == 0:
+        ax.axis('off')
+        continue
+    delezi = [v1 / skupno, v2 / skupno]
+    ax.pie(delezi, labels=[kontinent1, kontinent2], autopct='%1.1f%%', startangle=90, colors=['cornflowerblue', 'salmon'])
+    ax.set_title(kategorija)
 
-# Nariši skupni horizontalni histogram
-plt.figure(figsize=(10, 7))
-x = range(len(vse_kategorije))
-bar_width = 0.4
+# Če so kakšni prazni grafi (če bi bilo več kot 9 slotov), jih ugasni
+for j in range(i+1, len(axs)):
+    axs[j].axis('off')
 
-plt.barh([i + bar_width for i in x], vrednosti1, height=bar_width, label=kontinent1, color='cornflowerblue')
-plt.barh(x, vrednosti2, height=bar_width, label=kontinent2, color='salmon')
-
-plt.yticks([i + bar_width / 2 for i in x], vse_kategorije)
-plt.xlabel('Napadi (normalizirano glede na bolj napaden kontinent) [%]')
-plt.title(f'Primerjalna analiza napadov: {kontinent1} vs {kontinent2}')
-plt.legend()
-plt.xlim(0, 110)
-plt.grid(axis='x', linestyle='--', alpha=0.5)
+plt.suptitle(f'Primerjava napadov: {kontinent1} vs {kontinent2}', fontsize=18)
 plt.tight_layout()
+plt.subplots_adjust(top=0.92)
 plt.show()

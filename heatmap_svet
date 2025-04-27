@@ -1,0 +1,91 @@
+import pandas as pd
+import geopandas as gpd
+import matplotlib.pyplot as plt
+import pycountry
+import os
+
+# 1. Preveri, če zemljevid obstaja
+def preveri_ce_je_zemljevid(mapa='svetovni_zemljevid'):
+    shapefile_path = os.path.join(mapa, 'ne_110m_admin_0_countries.shp')
+    if not os.path.exists(shapefile_path):
+        print("⚠️ Zemljevid ni najden!")
+        print("Prenesi ročno z: https://www.naturalearthdata.com/downloads/110m-cultural-vectors/110m-admin-0-countries/")
+        print(f"In odpakiraj v: {os.path.abspath(mapa)}")
+        exit()
+    else:
+        print("✅ Svetovni zemljevid najden.")
+
+# 2. Funkcija za povezavo imen držav
+def najdi_iso(drzava):
+    try:
+        return pycountry.countries.lookup(drzava).alpha_3
+    except:
+        return None
+
+# 3. Glavni program
+def risanje_heatmape():
+    preveri_ce_je_zemljevid()
+
+    world = gpd.read_file('svetovni_zemljevid/ne_110m_admin_0_countries.shp')
+
+    df = pd.read_csv('cyber_data.csv')
+    df.columns = df.columns.str.strip()
+    df['AttackDate'] = pd.to_datetime(df['AttackDate'].str[:10], dayfirst=True)
+
+    kategorije = [
+        'Spam', 'Ransomware', 'Local Infection',
+        'Exploit', 'Malicious Mail',
+        'Network Attack', 'On Demand Scan', 'Web Threat'
+    ]
+
+    vsote_drzave = df.groupby('Country')[kategorije].mean()
+    vsote_drzave['Total'] = vsote_drzave.sum(axis=1)
+    vsote_drzave['iso_a3'] = vsote_drzave.index.map(najdi_iso)
+
+    print("Možne kategorije:", kategorije)
+    izbira = input("Vpiši kategorijo za prikaz ali pritisni Enter za vse skupaj:\n").strip()
+
+    if izbira == "":
+        stolpec = 'Total'
+        naslov = 'Povprečna skupna napadenost (vse kategorije)'
+    elif izbira in kategorije:
+        stolpec = izbira
+        naslov = f'Povprečna napadenost: {izbira}'
+    else:
+        print("Neveljavna izbira kategorije.")
+        exit()
+
+    merged = world.merge(vsote_drzave, left_on='ADM0_A3', right_on='iso_a3', how='left')
+
+    # 🔥 Uporabimo qcut za razdelitev v 5 razredov
+    try:
+        merged['Razred'] = pd.qcut(merged[stolpec], q=5, labels=['Zelo malo', 'Malo', 'Srednje', 'Veliko', 'Zelo veliko'])
+    except ValueError:
+        # Če premalo različnih vrednosti
+        merged['Razred'] = pd.cut(merged[stolpec], bins=5, labels=['Zelo malo', 'Malo', 'Srednje', 'Veliko', 'Zelo veliko'])
+
+    fig, ax = plt.subplots(1, 1, figsize=(20, 10))
+
+    merged.plot(
+        column='Razred',
+        cmap='coolwarm',           # Barvna lestvica
+        ax=ax,
+        legend=True,
+        missing_kwds={
+            "color": "lightgreen",
+            "edgecolor": "black",
+            "hatch": "///",
+            "label": "Ni podatkov"
+        },
+        edgecolor="black",
+        linewidth=0.5
+    )
+
+    ax.set_title(f'🌍 Porazdelitev napadenosti držav - {naslov}', fontsize=18)
+    ax.axis('off')
+
+    plt.tight_layout()
+    plt.show()
+
+if __name__ == "__main__":
+    risanje_heatmape()

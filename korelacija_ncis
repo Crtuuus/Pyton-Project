@@ -1,0 +1,48 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import os
+
+# 1. Naloži tvoje podatke o napadih
+df_napadi = pd.read_csv('cyber_data.csv')
+df_napadi.columns = df_napadi.columns.str.strip()
+df_napadi['AttackDate'] = pd.to_datetime(df_napadi['AttackDate'].str[:10], dayfirst=True)
+
+# Povprečna vrednost napadov na državo
+kategorije = ['Spam', 'Ransomware', 'Local Infection', 'Exploit', 'Malicious Mail', 'Network Attack', 'On Demand Scan', 'Web Threat']
+povprecja_napadov = df_napadi.groupby('Country')[kategorije].mean()
+
+# 2. Naloži NCSI podatke
+# Predpostavljam, da si pred tem prenesel preko kagglehub
+path = '/home/user/.cache/kagglehub/datasets/katerynameleshenko/cyber-security-indexes/versions/5'  # <- zamenjaj z realno potjo
+ncsi_datoteka = 'Cyber_security.csv'  # <- npr. 'cyber_security_indexes.csv'
+
+# Naloži NCSI CSV
+df_ncsi = pd.read_csv(os.path.join(path, ncsi_datoteka))
+
+# 3. Preimenuj pomembne stolpce
+# Poglej stolpce, da vidiš kako se imenujejo:
+print("Stolpci v NCSI datoteki:", df_ncsi.columns)
+
+# Potem popravi imena ustrezno:
+df_ncsi = df_ncsi.rename(columns={
+    'Country': 'Country',                # Če je že 'Country', ni treba nič spreminjat
+    'Cybersecurity Index': 'NCSI'         # Pravi stolpec, ki vsebuje oceno
+})
+
+# 4. Združi napade z NCSI
+merged = povprecja_napadov.merge(df_ncsi[['Country', 'NCSI']], on='Country', how='left')
+
+# 5. Poglej vzorec podatkov
+print("\nPrvih nekaj vrstic združenih podatkov:")
+print(merged.head())
+
+# 6. Izračunaj korelacijo med vrstami napadov in NCSI
+korelacija_ncsi = merged[kategorije + ['NCSI']].corr().loc[kategorije, ['NCSI']]
+
+# 7. Nariši heatmap
+plt.figure(figsize=(8, 6))
+sns.heatmap(korelacija_ncsi, annot=True, cmap='coolwarm', center=0)
+plt.title('Korelacija vrst napadov z NCSI. Visoka korelacija pomeni, da je vrsta napada pogosta v glede na NCSI varnih državah.')
+plt.tight_layout()
+plt.show()
