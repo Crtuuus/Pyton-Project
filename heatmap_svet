@@ -8,12 +8,12 @@ import os
 def preveri_ce_je_zemljevid(mapa='svetovni_zemljevid'):
     shapefile_path = os.path.join(mapa, 'ne_110m_admin_0_countries.shp')
     if not os.path.exists(shapefile_path):
-        print("⚠️ Zemljevid ni najden!")
-        print("Prenesi ročno z: https://www.naturalearthdata.com/downloads/110m-cultural-vectors/110m-admin-0-countries/")
+        print("Zemljevid ni najden!")
+        print("Prenesi ročno z: https://www.naturalearthdata.com/downloads/110m-cultural-vectors/110m-admin-0-countries/ \nIzberite možnost download countries")
         print(f"In odpakiraj v: {os.path.abspath(mapa)}")
         exit()
     else:
-        print("✅ Svetovni zemljevid najden.")
+        print(" Svetovni zemljevid najden.")
 
 # 2. Funkcija za povezavo imen držav
 def najdi_iso(drzava):
@@ -57,7 +57,7 @@ def risanje_heatmape():
 
     merged = world.merge(vsote_drzave, left_on='ADM0_A3', right_on='iso_a3', how='left')
 
-    # 🔥 Uporabimo qcut za razdelitev v 5 razredov
+    #  Uporabimo qcut za razdelitev v 5 razredov
     try:
         merged['Razred'] = pd.qcut(merged[stolpec], q=5, labels=['Zelo malo', 'Malo', 'Srednje', 'Veliko', 'Zelo veliko'])
     except ValueError:
@@ -81,7 +81,7 @@ def risanje_heatmape():
         linewidth=0.5
     )
 
-    ax.set_title(f'🌍 Porazdelitev napadenosti držav - {naslov}', fontsize=18)
+    ax.set_title(f'Porazdelitev napadenosti držav - {naslov}', fontsize=18)
     ax.axis('off')
 
     plt.tight_layout()
