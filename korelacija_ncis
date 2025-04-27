@@ -13,9 +13,14 @@ kategorije = ['Spam', 'Ransomware', 'Local Infection', 'Exploit', 'Malicious Mai
 povprecja_napadov = df_napadi.groupby('Country')[kategorije].mean()
 
 # 2. Naloži NCSI podatke
-# Predpostavljam, da si pred tem prenesel preko kagglehub
-path = '/home/user/.cache/kagglehub/datasets/katerynameleshenko/cyber-security-indexes/versions/5'  # <- zamenjaj z realno potjo
-ncsi_datoteka = 'Cyber_security.csv'  # <- npr. 'cyber_security_indexes.csv'
+import kagglehub
+
+# Download latest version
+path = kagglehub.dataset_download("katerynameleshenko/cyber-security-indexes")
+
+print("Path to dataset files:", path)
+# Pot do tvoje datoteke
+ncsi_datoteka = 'Cyber_security.csv'
 
 # Naloži NCSI CSV
 df_ncsi = pd.read_csv(os.path.join(path, ncsi_datoteka))
